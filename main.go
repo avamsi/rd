@@ -44,7 +44,5 @@ func main() {
 		fmt.Println(rd(os.Args[1]))
 	default:
 		fmt.Fprintln(os.Stderr, "rd: expected at most 1 argument, got", os.Args[1:])
-		// Do our best to output the arguments back (mostly for cd to fail).
-		fmt.Println(strings.Join(os.Args[1:], " "))
 	}
 }
