@@ -4,7 +4,7 @@ $ go install github.com/avamsi/rd@latest
 ```shell
 cd() {
 	builtin cd $@ || {
-		local p=$(rd $@) && builtin cd $p && print "rd: cd'ed to $p"
+		local d=$(rd $@) && builtin cd $d && print "rd: cd'ed to $d"
 	}
 }
 ```
