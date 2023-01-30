@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/avamsi/ergo"
 )
@@ -44,5 +43,6 @@ func main() {
 		fmt.Println(rd(os.Args[1]))
 	default:
 		fmt.Fprintln(os.Stderr, "rd: expected at most 1 argument, got", os.Args[1:])
+		os.Exit(1)
 	}
 }
