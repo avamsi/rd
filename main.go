@@ -9,40 +9,61 @@ import (
 	"github.com/avamsi/ergo"
 )
 
-func rd(p string) string {
+// immediateDir returns the immediate directory of the given path -- i.e., the
+// path itself if it's a directory, its parent directory otherwise.
+func immediateDir(p string) (string, error) {
+	s, err := os.Stat(p)
+	if err != nil {
+		return "", err
+	}
+	if s.IsDir() {
+		return p, nil
+	}
+	return filepath.Dir(p), nil
+}
+
+func noSuchErr(p string) error {
+	return fmt.Errorf("no such file or directory: %s", p)
+}
+
+func rd(p string) (string, error) {
 	// If the input is an absolute path, don't check for relative paths up the
 	// CWD -- convert the path to a directory (if needed) for cd though.
 	if filepath.IsAbs(p) {
-		if s, err := os.Stat(p); err != nil && !s.IsDir() {
-			return filepath.Dir(p)
+		d, err := immediateDir(p)
+		if errors.Is(err, os.ErrNotExist) {
+			return "", noSuchErr(p)
 		}
-		return p
+		return d, err
 	}
 	// For a relative path, check every directory starting with the CWD to the
 	// root directory till a path is found (and covert said path to a directory
 	// if needed, just like we do above).
 	cwd := ergo.Must1(os.Getwd())
-	for next := filepath.Dir(cwd); cwd != next; cwd, next = next, filepath.Dir(next) {
-		q := filepath.Join(cwd, p)
-		if s, err := os.Stat(q); errors.Is(err, os.ErrNotExist) {
+	for next := filepath.Dir(cwd); cwd != next; {
+		d, err := immediateDir(filepath.Join(cwd, p))
+		if errors.Is(err, os.ErrNotExist) {
+			cwd, next = next, filepath.Dir(next)
 			continue
-		} else if s.IsDir() {
-			return q
-		} else {
-			return filepath.Dir(q)
 		}
+		return d, err
 	}
-	return p
+	return "", noSuchErr(p)
 }
 
 func main() {
-	switch len(os.Args) {
-	case 1:
+	switch args := os.Args[1:]; len(args) {
+	case 0:
 		// Do nothing.
-	case 2:
-		fmt.Println(rd(os.Args[1]))
+	case 1:
+		if d, err := rd(args[0]); err != nil {
+			fmt.Fprintf(os.Stderr, "rd: %v\n", err)
+			os.Exit(1)
+		} else {
+			fmt.Println(d)
+		}
 	default:
-		fmt.Fprintln(os.Stderr, "rd: expected at most 1 argument, got", os.Args[1:])
+		fmt.Fprintln(os.Stderr, "rd: expected at most 1 argument, got", args)
 		os.Exit(1)
 	}
 }
