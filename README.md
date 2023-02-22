@@ -1,6 +1,7 @@
 ```
 $ go install github.com/avamsi/rd@latest
 ```
+
 ```shell
 cd() {
 	# Keep the original cd error hidden for if rd succeeds below.
