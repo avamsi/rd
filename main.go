@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
-	"github.com/avamsi/ergo"
+	"github.com/avamsi/ergo/assert"
 )
 
 // immediateDir returns the immediate directory of the given path -- i.e., the
@@ -31,7 +32,7 @@ func rd(p string) (string, error) {
 	// CWD -- convert the path to a directory (if needed) for cd though.
 	if filepath.IsAbs(p) {
 		d, err := immediateDir(p)
-		if errors.Is(err, os.ErrNotExist) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return "", noSuchErr(p)
 		}
 		return d, err
@@ -39,10 +40,10 @@ func rd(p string) (string, error) {
 	// For a relative path, check every directory starting with the CWD to the
 	// root directory till a path is found (and covert said path to a directory
 	// if needed, just like we do above).
-	cwd := ergo.Must1(os.Getwd())
+	cwd := assert.Ok(os.Getwd())
 	for next := filepath.Dir(cwd); cwd != next; {
 		d, err := immediateDir(filepath.Join(cwd, p))
-		if errors.Is(err, os.ErrNotExist) {
+		if errors.Is(err, fs.ErrNotExist) {
 			cwd, next = next, filepath.Dir(next)
 			continue
 		}

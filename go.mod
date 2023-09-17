@@ -1,5 +1,5 @@
 module github.com/avamsi/rd
 
-go 1.19
+go 1.20
 
-require github.com/avamsi/ergo v0.0.0-20220813110843-329213a43bfc
+require github.com/avamsi/ergo v0.0.0-20230913052809-930ba920a5a0
