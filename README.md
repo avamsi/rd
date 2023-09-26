@@ -11,6 +11,7 @@ cd() {
 		d=$(rd $@) && builtin cd $d || {
 			# No luck, show the original error as well.
 			cat /tmp/rd-cde
+			return 1
 		}
 	}
 }
